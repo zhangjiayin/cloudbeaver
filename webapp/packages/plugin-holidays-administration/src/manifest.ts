@@ -7,9 +7,9 @@
  */
 import type { PluginManifest } from '@cloudbeaver/core-di';
 
-export const administrationTopAppBarPlugin: PluginManifest = {
+export const holidaysAdministrationPlugin: PluginManifest = {
   info: {
-    name: 'Administration Top App Bar plugin',
+    name: 'Holidays Administration plugin',
   },
-  providers: [() => import('./PluginBootstrap.js').then(m => m.PluginBootstrap)],
+  providers: [() => import('./PluginBootstrap.js').then(m => m.HolidayAdministrationBootstrap)],
 };

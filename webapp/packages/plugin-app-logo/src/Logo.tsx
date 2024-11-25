@@ -12,12 +12,14 @@ import { useService } from '@cloudbeaver/core-di';
 import { PermissionsService, ProductInfoResource } from '@cloudbeaver/core-root';
 import { ScreenService } from '@cloudbeaver/core-routing';
 import { useAppVersion } from '@cloudbeaver/core-version';
+import { HolidaysService } from '@cloudbeaver/plugin-holidays';
 
 export const Logo = observer(function Logo() {
   const productInfoResource = useResource(Logo, ProductInfoResource, undefined);
   const screenService = useService(ScreenService);
   const permissionsService = useService(PermissionsService);
   const { backendVersion, frontendVersion } = useAppVersion(true);
+  const { holiday } = useService(HolidaysService);
 
   const isSameVersion = backendVersion === frontendVersion;
 
@@ -27,5 +29,5 @@ export const Logo = observer(function Logo() {
 
   const title = isSameVersion ? backendVersionTitle : commonVersionTitle;
 
-  return <AppLogo title={title} onClick={permissionsService.publicDisabled ? undefined : screenService.navigateToRoot} />;
+  return <AppLogo title={title} iconSrc={holiday?.logoSrc} onClick={permissionsService.publicDisabled ? undefined : screenService.navigateToRoot} />;
 });

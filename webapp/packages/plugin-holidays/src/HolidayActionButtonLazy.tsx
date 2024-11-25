@@ -5,7 +5,6 @@
  * Licensed under the Apache License, Version 2.0.
  * you may not use this file except in compliance with the License.
  */
-import { administrationTopAppBarPlugin } from './manifest.js';
+import { importLazyComponent } from '@cloudbeaver/core-blocks';
 
-export { administrationTopAppBarPlugin };
-export default administrationTopAppBarPlugin;
+export const HolidayActionButtonLazy = importLazyComponent(() => import('./HolidayActionButton.js').then(m => m.HolidayActionButton));
