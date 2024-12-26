@@ -39,8 +39,7 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.UUID;
 
 @MultipartConfig
 public class WebSQLFileLoaderServlet extends WebServiceServletBase {
@@ -54,8 +53,6 @@ public class WebSQLFileLoaderServlet extends WebServiceServletBase {
     private static final String TEMP_FILE_FOLDER = "temp-sql-upload-files";
 
     private static final String FILE_ID = "fileId";
-
-    private static final Pattern FORBIDDEN_CHARACTERS_FILE_PATTERN = Pattern.compile("(?U)[$()@ /]");
 
     private static final Gson gson = new GsonBuilder()
             .serializeNulls()
@@ -94,13 +91,11 @@ public class WebSQLFileLoaderServlet extends WebServiceServletBase {
         if (fileId == null) {
             throw new DBWebException("File ID not found");
         }
-        Matcher matcher = FORBIDDEN_CHARACTERS_FILE_PATTERN.matcher(fileId);
-        if (fileId.startsWith(".")) {
-            throw new DBWebException("Invalid resource path '%s': resource path cannot start with a dot".formatted(fileId));
-        }
-        if (matcher.find()) {
-            String illegalCharacters = matcher.group();
-            throw new DBException("Resource path '%s' contains illegal characters: %s".formatted(fileId, illegalCharacters));
+        try {
+            // file id must be UUID
+            UUID.fromString(fileId);
+        } catch (IllegalArgumentException e) {
+            throw new DBWebException("File ID is invalid");
         }
         Path file = tempFolder.resolve(fileId);
         try {
