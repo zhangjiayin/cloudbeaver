@@ -39,6 +39,8 @@ import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @MultipartConfig
 public class WebSQLFileLoaderServlet extends WebServiceServletBase {
@@ -53,7 +55,7 @@ public class WebSQLFileLoaderServlet extends WebServiceServletBase {
 
     private static final String FILE_ID = "fileId";
 
-    private static final String FORBIDDEN_CHARACTERS_FILE_REGEX = "(?U)[$()@ /]+";
+    private static final Pattern FORBIDDEN_CHARACTERS_FILE_PATTERN = Pattern.compile("(?U)[$()@ /]");
 
     private static final Gson gson = new GsonBuilder()
             .serializeNulls()
@@ -89,19 +91,23 @@ public class WebSQLFileLoaderServlet extends WebServiceServletBase {
         Map<String, Object> variables = gson.fromJson(request.getParameter(REQUEST_PARAM_VARIABLES), MAP_STRING_OBJECT_TYPE);
 
         String fileId = JSONUtils.getString(variables, FILE_ID);
-
-        if (fileId != null && !fileId.matches(FORBIDDEN_CHARACTERS_FILE_REGEX) && !fileId.startsWith(".")) {
-            Path file = tempFolder.resolve(fileId);
-            try {
-                Files.write(file, request.getPart("fileData").getInputStream().readAllBytes());
-            } catch (ServletException e) {
-                log.error(e.getMessage());
-                throw new DBWebException(e.getMessage());
-            }
-        } else {
-            String illegalCharacters = fileId != null ?
-                fileId.replaceAll(FORBIDDEN_CHARACTERS_FILE_REGEX, " ").strip() : null;
-            throw new DBException("Resource path '" + fileId + "' contains illegal characters: " + illegalCharacters);
+        if (fileId == null) {
+            throw new DBWebException("File ID not found");
+        }
+        Matcher matcher = FORBIDDEN_CHARACTERS_FILE_PATTERN.matcher(fileId);
+        if (fileId.startsWith(".")) {
+            throw new DBWebException("Invalid resource path '%s': resource path cannot start with a dot".formatted(fileId));
+        }
+        if (matcher.find()) {
+            String illegalCharacters = matcher.group();
+            throw new DBException("Resource path '%s' contains illegal characters: %s".formatted(fileId, illegalCharacters));
+        }
+        Path file = tempFolder.resolve(fileId);
+        try {
+            Files.write(file, request.getPart("fileData").getInputStream().readAllBytes());
+        } catch (ServletException e) {
+            log.error(e.getMessage());
+            throw new DBWebException(e.getMessage());
         }
     }
 }
