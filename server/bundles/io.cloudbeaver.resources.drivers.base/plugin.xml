@@ -39,7 +39,7 @@
         <bundle id="drivers.mssql.new" label="SQL Server drivers"/>
         <bundle id="drivers.trino" label="Trino drivers"/>
         <bundle id="drivers.kyuubi" label="Apache Kyuubi drivers"/>
-        <bundle id="drivers.gaussdb" label="Huawei Gaussdb drivers"/>
+        <bundle id="drivers.gaussdb" label="Huawei GaussDB drivers"/>
     </extension>
 
     <!-- Enabled drivers -->
